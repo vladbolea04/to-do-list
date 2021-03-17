@@ -3,20 +3,29 @@ import "./App.css";
 
 import { useState } from "react";
 
+let id = 0;
+
 function App() {
   const [text, setText] = useState("");
-  let [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([]);
 
   const handleChange = (event) => {
     setText(event.target.value);
   };
 
   const handleSubmit = () => {
-    setTasks((prev) => {
-      return [text, ...prev];
-    });
+    if (text !== "") {
+      id += 1;
+      setTasks((prev) => {
+        return [{ value: text, index: id }, ...prev];
+      });
 
-    setText("");
+      setText("");
+    }
+  };
+
+  const handleRemove = (id) => {
+    tasks.splice(id, 1);
   };
 
   console.log(tasks);
@@ -29,8 +38,8 @@ function App() {
       </div>
       <div className="list-container">
         <div className="task-list">
-          {tasks.map((element) => {
-            return <Task task={element} />;
+          {tasks.map(({ value, index }) => {
+            return <Task task={value} key={index} onRemove={handleRemove} />;
           })}
         </div>
       </div>
@@ -46,7 +55,7 @@ function Task(props) {
     <>
       {!del && (
         <div className="task">
-          <p style={{ "text-decoration-line": line ? "line-through" : "none" }}>
+          <p style={{ textDecorationLine: line ? "line-through" : "none" }}>
             {props.task}
           </p>
 
@@ -61,6 +70,7 @@ function Task(props) {
           <button
             className="delete"
             onClick={() => {
+              props.onRemove(props.id);
               setDel(true);
             }}
           >
