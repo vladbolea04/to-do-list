@@ -24,6 +24,12 @@ function App() {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSubmit();
+    }
+  };
+
   const handleRemove = (id) => {
     tasks.splice(id, 1);
   };
@@ -33,7 +39,12 @@ function App() {
     <div className="App">
       <p className="title">To do</p>
       <div className="input-container">
-        <input type="text" onChange={handleChange} value={text} />
+        <input
+          type="text"
+          onChange={handleChange}
+          value={text}
+          onKeyPress={handleKeyPress}
+        />
         <button onClick={handleSubmit}>Ok</button>
       </div>
       <div className="list-container">
@@ -55,27 +66,31 @@ function Task(props) {
     <>
       {!del && (
         <div className="task">
-          <p style={{ textDecorationLine: line ? "line-through" : "none" }}>
+          <p
+            className="task-description"
+            style={{ textDecorationLine: line ? "line-through" : "none" }}
+          >
             {props.task}
           </p>
-
-          <button
-            className="complete"
-            onClick={() => {
-              setLine(!line);
-            }}
-          >
-            Complete
-          </button>
-          <button
-            className="delete"
-            onClick={() => {
-              props.onRemove(props.id);
-              setDel(true);
-            }}
-          >
-            Delete
-          </button>
+          <div className="align-right">
+            <button
+              className="complete"
+              onClick={() => {
+                setLine(!line);
+              }}
+            >
+              Complete
+            </button>
+            <button
+              className="delete"
+              onClick={() => {
+                props.onRemove(props.id);
+                setDel(true);
+              }}
+            >
+              Delete
+            </button>
+          </div>
         </div>
       )}
     </>
