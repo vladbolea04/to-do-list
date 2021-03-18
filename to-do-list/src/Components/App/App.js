@@ -1,15 +1,23 @@
 import "../List/List";
 import "./App.css";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 let id = 0;
 
-function App() {
-  const [text, setText] = useState("");
-  const [tasks, setTasks] = useState([]);
+export default function App() {
+  const [text, setText] = useState(localStorage.getItem("text") || "");
+  const [tasks, setTasks] = useState(
+    JSON.parse(localStorage.getItem("tasks")) || []
+  );
+
+  useEffect(() => {
+    localStorage.setItem("text", text);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [text, tasks]);
 
   const handleChange = (event) => {
+    localStorage.setItem("text", event.target.value);
     setText(event.target.value);
   };
 
@@ -17,7 +25,7 @@ function App() {
     if (text !== "") {
       id += 1;
       setTasks((prev) => {
-        return [{ value: text, index: id }, ...prev];
+        return [{ value: text, index: id, done: false }, ...prev];
       });
 
       setText("");
@@ -31,10 +39,13 @@ function App() {
   };
 
   const handleRemove = (id) => {
-    console.log(id);
     tasks.splice(tasks.length - id, 1);
+    if (tasks.length === 0) {
+      setTasks([]);
+    }
+    localStorage.setItem("text", text);
+    console.log(tasks);
   };
-  console.log(tasks);
 
   return (
     <div className="App">
@@ -50,12 +61,14 @@ function App() {
       </div>
       <div className="list-container">
         <div className="task-list">
-          {tasks.map(({ value, index }) => {
+          {tasks.length === 0 && <p>Empty list</p>}
+          {tasks.map(({ value, index, done }) => {
             return (
               <Task
                 task={value}
                 key={index}
                 id={index}
+                done={done}
                 onRemove={handleRemove}
               />
             );
@@ -67,8 +80,20 @@ function App() {
 }
 
 function Task(props) {
-  const [line, setLine] = useState(false);
   const [del, setDel] = useState(false);
+
+  const [taskDone, setTaskDone] = useState(
+    localStorage.getItem("isTaskDone") || props.done
+  );
+  useEffect(() => {
+    localStorage.setItem("isTaskDone", taskDone);
+  }, [taskDone]);
+  const handleDone = () => {
+    setTaskDone(!taskDone);
+    localStorage.setItem("isTaskDone", taskDone);
+  };
+
+  console.log(taskDone, props.done);
 
   return (
     <>
@@ -76,17 +101,12 @@ function Task(props) {
         <div className="task">
           <p
             className="task-description"
-            style={{ textDecorationLine: line ? "line-through" : "none" }}
+            style={{ textDecorationLine: !taskDone ? "line-through" : "none" }}
           >
             {props.task}
           </p>
           <div className="align-right">
-            <button
-              className="complete"
-              onClick={() => {
-                setLine(!line);
-              }}
-            >
+            <button className="complete" onClick={handleDone}>
               Complete
             </button>
             <button
@@ -104,5 +124,3 @@ function Task(props) {
     </>
   );
 }
-
-export default App;
